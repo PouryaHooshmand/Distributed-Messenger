@@ -14,3 +14,5 @@ class User(db.Model, UserMixin):
 
     first_name = db.Column(db.String(100, collation='NOCASE'), nullable=False, server_default='')
     last_name = db.Column(db.String(100, collation='NOCASE'), nullable=False, server_default='')
+
+    language = db.Column(db.String(100, collation='NOCASE'), server_default='en')

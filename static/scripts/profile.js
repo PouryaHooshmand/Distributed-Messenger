@@ -1,7 +1,12 @@
 document.getElementById("lang").onchange = function(){
-  if (this.value == 'en') {
-    console.log('english')
-  } else {
-    console.log(this.value)
-  } 
+  fetch("lang_update", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({'language': this.value}),
+  })
+  .catch(error => {
+    console.error("Error:", error);
+  });
 }

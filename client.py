@@ -104,7 +104,14 @@ def show_channel():
     else:
         return redirect(url_for('user.login'))
     
-
+@app.route('/user/lang_update', methods=['POST'])
+@login_required
+def lang_update():
+    # send message to channel
+    lang = request.get_json()['language']
+    current_user.language = lang
+    db.session.commit()
+    return {'message':'ok'}, 200
 
 @app.route('/post', methods=['POST'])
 def post_message():
