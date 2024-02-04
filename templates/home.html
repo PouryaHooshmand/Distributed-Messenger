@@ -1,0 +1,10 @@
+{% extends "flask_user_layout.html" %}
+{% block content %}
+<h1>List of message channels</h1>
+
+<ul>
+    {% for channel in channels %}
+        <li><a href="/show?channel={{ channel.endpoint | urlencode }}">{{ channel.name }}</a></li>
+    {% endfor %}
+</ul>
+{% endblock %}
