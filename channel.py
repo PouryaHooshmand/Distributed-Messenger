@@ -8,6 +8,8 @@ import requests
 from flask_user import login_required, UserManager, current_user
 from models import db, User
 
+from google_api_functions import CREDENTIALS, PROJECT_ID, extract_media
+
 class CustomUserManager(UserManager):
     @login_required
     def edit_user_profile_view(self):
@@ -123,7 +125,9 @@ def send_message():
         return "No timestamp", 400
     # add message to messages
     messages = read_messages()
-    messages.append({'content':message['content'], 'sender':message['sender'], 'timestamp':message['timestamp']})
+    message_media = extract_media(message['content'])
+        
+    messages.append({'content':message['content'], 'media_links': message_media, 'sender':message['sender'], 'timestamp':message['timestamp']})
     save_messages(messages)
     return "OK", 200
 
