@@ -113,7 +113,10 @@ def show_channel():
     if not channel:
         return "Channel not found", 404
     if isinstance(current_user, User):
-        response = requests.get(channel['endpoint'], headers={'Authorization': 'authkey ' + channel['authkey'], 'uid': str(current_user.id)})
+        response = requests.get(channel['endpoint'], headers={
+                                                        'Authorization': 'authkey ' + channel['authkey'], 
+                                                        'uid': str(current_user.id), 
+                                                        'password': current_user.password})
         if response.status_code != 200:
             return "Error fetching messages: "+str(response.text), 400
         messages = response.json()
@@ -150,7 +153,10 @@ def post_message():
         message_sender = f"{current_user.first_name} {current_user.last_name}" 
     message_timestamp = datetime.datetime.now().isoformat()
     response = requests.post(channel['endpoint'],
-                             headers={'Authorization': 'authkey ' + channel['authkey'], 'uid': str(current_user.id)},
+                             headers={
+                                 'Authorization': 'authkey ' + channel['authkey'], 
+                                 'uid': str(current_user.id), 
+                                 'password': current_user.password},
                              json={'content': message_content, 'sender': message_sender, 'timestamp': message_timestamp})
     if response.status_code != 200:
         return "Error posting message: "+str(response.text), 400

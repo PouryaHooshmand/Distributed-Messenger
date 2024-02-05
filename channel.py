@@ -91,7 +91,11 @@ def check_authorization(request):
     if isinstance(current_user, User):
         if str(user_dict['id'])==request.headers['uid']:
             return True
-    current_user = User.query.get(request.headers['uid'])
+    user = User.query.get(request.headers['uid'])
+    if user.password == request.headers['password']:
+        current_user = user
+    else:
+        return False
     return True
 
 @app.route('/health', methods=['GET'])
