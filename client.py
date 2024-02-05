@@ -151,7 +151,7 @@ def post_message():
     message_timestamp = datetime.datetime.now().isoformat()
     response = requests.post(channel['endpoint'],
                              headers={'Authorization': 'authkey ' + channel['authkey'], 'uid': str(current_user.id)},
-                             json={'content': message_content, 'sender': message_sender, 'timestamp': message_timestamp})
+                             json={'content': message_content, 'sender_id': current_user.id, 'sender': message_sender, 'timestamp': message_timestamp})
     if response.status_code != 200:
         return "Error posting message: "+str(response.text), 400
     return redirect(url_for('show_channel')+'?channel='+urllib.parse.quote(post_channel))

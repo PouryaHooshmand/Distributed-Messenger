@@ -6,7 +6,7 @@ import json
 import requests
 
 from flask_user import login_required, UserManager, current_user
-from models import db, User
+from models import db, User, Post, MediaLink
 
 from google_api_functions import CREDENTIALS, PROJECT_ID, extract_media
 
@@ -126,6 +126,14 @@ def send_message():
     # add message to messages
     messages = read_messages()
     message_media = extract_media(message['content'])
+    message_obj = Post(user_id=message['sender_id'], content=message['content'])
+    db.session.add(message_obj)
+    db.session.commit()
+    for m in message_media:
+        media_links_obj= MediaLink(post_id=message_obj.id, name=m, link=message_media[m])
+        db.session.add(media_links_obj)
+    db.session.commit()
+    
         
     messages.append({'content':message['content'], 'media_links': message_media, 'sender':message['sender'], 'timestamp':message['timestamp']})
     save_messages(messages)
