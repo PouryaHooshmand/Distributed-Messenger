@@ -63,7 +63,6 @@ HUB_AUTHKEY = '1234567890'
 CHANNEL_AUTHKEY = '0987654321'
 CHANNEL_NAME = "The One and Only Channel"
 CHANNEL_ENDPOINT = "http://localhost:5001" # don't forget to adjust in the bottom of the file
-CHANNEL_FILE = 'messages.json'
 
 @app.cli.command('register')
 def register_command():
@@ -124,7 +123,33 @@ def send_message():
     if not 'timestamp' in message:
         return "No timestamp", 400
     # add message to messages
-    messages = read_messages()
+    save_message(message)
+
+    return "OK", 200
+
+def read_messages():
+    posts = Post.query.all()
+    messages = []
+    for post in posts:
+        user = User.query.get(post.user_id)
+        if user.first_name or user.last_name:
+            sender_name = f"{user.first_name} {user.last_name}" 
+        else:
+            sender_name = user.username
+
+        media_links = {}
+        for m in post.media_links:
+            media_links[m.name] =m.link
+        
+        message = {'sender': sender_name,
+                   'content': post.content,
+                   'timestamp': post.posted_at.strftime('%a %d %b %Y, %I:%M%p'),
+                   'media_links': media_links}
+        messages.append(message)
+    return messages
+
+
+def save_message(message):
     message_media = extract_media(message['content'])
     message_obj = Post(user_id=message['sender_id'], content=message['content'])
     db.session.add(message_obj)
@@ -133,29 +158,6 @@ def send_message():
         media_links_obj= MediaLink(post_id=message_obj.id, name=m, link=message_media[m])
         db.session.add(media_links_obj)
     db.session.commit()
-    
-        
-    messages.append({'content':message['content'], 'media_links': message_media, 'sender':message['sender'], 'timestamp':message['timestamp']})
-    save_messages(messages)
-    return "OK", 200
-
-def read_messages():
-    global CHANNEL_FILE
-    try:
-        f = open(CHANNEL_FILE, 'r')
-    except FileNotFoundError:
-        return []
-    try:
-        messages = json.load(f)
-    except json.decoder.JSONDecodeError:
-        messages = []
-    f.close()
-    return messages
-
-def save_messages(messages):
-    global CHANNEL_FILE
-    with open(CHANNEL_FILE, 'w') as f:
-        json.dump(messages, f)
 
 # Start development web server
 if __name__ == '__main__':
