@@ -9,9 +9,9 @@
             <p>
                 <div id="msg_text{{i}}">
                     {{ messages[i].content }}</div> 
-                    <a id="translate" onClick="translate_text('{{ messages[i].content }}', '{{ url_for('translate')}}', '{{ i }}');">Translate</a>
+                    <a id="translate" onClick="translate_text('{{ messages[i].content| replace("'", "\\'") | replace('"', '\\"')  }}', '{{ url_for('translate') }}', '{{ i }}');">Translate</a>
                     {% for m_title in messages[i].media_links %}
-                    <br><a href="{{messages[i].media_links[m_title]}}" target="_blank" rel="noopener noreferrer">{{ m_title }}</a>
+                    <br><a href="{{messages[i].media_links[m_title]| replace("'", "\\'") | replace('"', '\\"')}}" target="_blank" rel="noopener noreferrer">{{ m_title }}</a>
                     {% endfor %}
                 
                  </p>
