@@ -80,13 +80,17 @@ def register_command():
         return
 
 def check_authorization(request):
-    global CHANNEL_AUTHKEY
+    global CHANNEL_AUTHKEY, current_user
     # check if Authorization header is present
     if 'Authorization' not in request.headers:
         return False
     # check if authorization header is valid
     if request.headers['Authorization'] != 'authkey ' + CHANNEL_AUTHKEY:
         return False
+    user_dict = current_user.__dict__
+    if isinstance(current_user, User):
+        if str(user_dict['id'])==request.headers['uid']:
+            return True
     current_user = User.query.get(request.headers['uid'])
     return True
 
@@ -131,11 +135,14 @@ def read_messages():
     posts = Post.query.all()
     messages = []
     for post in posts:
-        user = User.query.get(post.user_id)
-        if user.first_name or user.last_name:
-            sender_name = f"{user.first_name} {user.last_name}" 
+        if post.user_id==current_user.id:
+            sender_name = 'You'
         else:
-            sender_name = user.username
+            user = User.query.get(post.user_id)
+            if user.first_name or user.last_name:
+                sender_name = f"{user.first_name} {user.last_name}" 
+            else:
+                sender_name = user.username
 
         media_links = {}
         for m in post.media_links:
@@ -151,7 +158,7 @@ def read_messages():
 
 def save_message(message):
     message_media = extract_media(message['content'])
-    message_obj = Post(user_id=message['sender_id'], content=message['content'])
+    message_obj = Post(user_id=current_user.id, content=message['content'])
     db.session.add(message_obj)
     db.session.commit()
     for m in message_media:
