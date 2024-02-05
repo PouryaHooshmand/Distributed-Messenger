@@ -7,6 +7,8 @@ from models import db, User
 
 from google_api_functions import *
 
+SUPPORTED_LANGUAGES = {'en': 'English', 'fr': 'French', 'de': 'German', 'fa': 'Persian'}
+
 class CustomUserManager(UserManager):
     @login_required
     def edit_user_profile_view(self):
@@ -27,8 +29,10 @@ class CustomUserManager(UserManager):
             # Render form
             self.prepare_domain_translations()
 
+            user_lang = current_user.language
+
             
-            return render_template(self.USER_EDIT_USER_PROFILE_TEMPLATE, form=form)
+            return render_template(self.USER_EDIT_USER_PROFILE_TEMPLATE, form=form, language_list=SUPPORTED_LANGUAGES, language=user_lang)
 
 
 class ConfigClass(object):
