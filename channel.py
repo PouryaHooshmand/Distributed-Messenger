@@ -140,7 +140,7 @@ def read_messages():
     messages = []
     for post in posts:
         if post.user_id==current_user.id:
-            sender_name = 'You'
+            sender_name = None
         else:
             user = User.query.get(post.user_id)
             if user.first_name or user.last_name:

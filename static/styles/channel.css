@@ -1,0 +1,27 @@
+.msg-container {
+    display: flex;
+    flex-direction: column;
+}
+
+#user-msg {
+    align-self: flex-end;
+}
+
+#others-msg {
+    align-self: flex-start;
+}
+
+.panel {
+    min-width: 20%;
+    max-width: 70%;
+    margin-bottom: 10px;
+}
+
+.panel-footer {
+    margin-top: auto;
+    text-align: right;
+}
+
+a:hover {
+    cursor:pointer;
+   }

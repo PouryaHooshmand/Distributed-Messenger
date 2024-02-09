@@ -4,28 +4,44 @@
 {% if channel %}
     <h1>Channel {{ channel.name }}</h1>
 
+    <div class="msg-container">
         {% for i in range(messages|count) %}
-            <h2>{{ messages[i].sender }}</h2>
-            <p>
-                <div id="msg_text{{i}}">
-                    {{ messages[i].content }}</div> 
-                    <a id="translate" onClick="translate_text('{{ messages[i].content| replace("'", "\\'") | replace('"', '\\"')  }}', '{{ url_for('translate') }}', '{{ i }}');">Translate</a>
-                    {% for m_title in messages[i].media_links %}
-                    <br><a href="{{messages[i].media_links[m_title]| replace("'", "\\'") | replace('"', '\\"')}}" target="_blank" rel="noopener noreferrer">{{ m_title }}</a>
-                    {% endfor %}
-                
-                 </p>
-            <p style="font-size: 60%">{{ messages[i].timestamp }}</p>
-            <script src="{{ url_for('static',filename='scripts/translate.js') }}"></script>
+            {% if not messages[i].sender %} 
+            <div class="panel panel-default" id="user-msg">
+                <div class="panel-heading"><b>You</b> </div>
+            {% else %}
+            <div class="panel panel-default" id="others-msg">
+                <div class="panel-heading"><b>{{ messages[i].sender }}</b></div>
+            {% endif %}
+                <div class="panel-body">
+                    <p>
+                        <div id="msg_text{{i}}">
+                            <span id="original-text" style="display: inline;">{{ messages[i].content }}</span>
+                            <span id="translated-text" style="display: none;"></span>
+                            <a id="translate" onClick="translate_text('{{ messages[i].content| replace("'", "\\'") | replace('"', '\\"')  }}', '{{ url_for('translate') }}', '{{ i }}');"><i class="material-icons" style="font-size:16px;">translate</i></a>
+                        </div> 
+                            {% for m_title in messages[i].media_links %}
+                            <a title="{{ m_title }}" href="{{messages[i].media_links[m_title]| replace("'", "\\'") | replace('"', '\\"')}}" target="_blank" rel="noopener noreferrer"><i class="material-icons" style="font-size:20px;">video_library</i></a>
+                            {% endfor %}
+                        
+                        </p>
+                </div>
+                <div class="panel-footer"><p style="font-size: 60%">{{ messages[i].timestamp }}</p></div>
+            </div>
         {% endfor %}
+    </div>
 {% else %}
     <h1>Channel not found</h1>
 {% endif %}
+
+<script src="{{ url_for('static',filename='scripts/translate.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static',filename='styles/channel.css') }}">
 
 <form action="post" method="post">
     <input type="hidden" name="channel" value="{{ channel.endpoint | urlencode }}">
     Message: <input type="text" name="content" id="content"> <br>
     <input type="submit" value="Post">
 </form>
+
 
 {% endblock %}
