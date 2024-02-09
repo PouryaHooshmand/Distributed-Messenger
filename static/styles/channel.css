@@ -5,10 +5,12 @@
 
 #user-msg {
     align-self: flex-end;
+    margin-right: 2%;
 }
 
 #others-msg {
     align-self: flex-start;
+    margin-left: 2%;
 }
 
 .panel {
@@ -25,3 +27,49 @@
 a:hover {
     cursor:pointer;
    }
+
+#send-msg {
+    font-family: 'Material Icons', sans-serif;
+    color: #000;
+    background-color: rgba(255, 255, 255, 0);
+    font-size: 18px;
+    border: none;
+}
+
+#send-msg:hover {
+    color: #3fa4e7;
+}
+
+#message-form {
+
+    display:flex;
+    flex-direction:row;
+    
+
+    border:2px solid grey;
+    border-radius: 20px;
+  
+
+    padding:1px;
+    width: 96%;
+    margin-left: 2%;
+}
+  
+#content {
+    flex-grow:2;
+    border-radius: 20px;
+    margin-left: 1%;
+
+    border:none;
+}
+  
+
+#content:focus {
+    outline: none;
+}
+  
+
+#message-form:focus-within { 
+    outline: 1px solid black
+}
+  

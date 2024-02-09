@@ -30,18 +30,18 @@
             </div>
         {% endfor %}
     </div>
+
+    <form id="message-form" action="post" method="post">
+        <input type="hidden" name="channel" value="{{ channel.endpoint | urlencode }}">
+        <input type="text" placeholder="Message" name="content" id="content">
+        <input type="submit" id="send-msg" value="&#xe163;">
+    </form>
 {% else %}
     <h1>Channel not found</h1>
 {% endif %}
 
 <script src="{{ url_for('static',filename='scripts/translate.js') }}"></script>
 <link rel="stylesheet" href="{{ url_for('static',filename='styles/channel.css') }}">
-
-<form action="post" method="post">
-    <input type="hidden" name="channel" value="{{ channel.endpoint | urlencode }}">
-    Message: <input type="text" name="content" id="content"> <br>
-    <input type="submit" value="Post">
-</form>
 
 
 {% endblock %}
