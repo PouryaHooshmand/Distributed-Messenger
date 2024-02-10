@@ -8,7 +8,7 @@ import requests
 from flask_user import login_required, UserManager, current_user
 from models import db, User, Post, MediaLink
 
-from google_api_functions import CREDENTIALS, PROJECT_ID, extract_media
+from google_api_functions import PROJECT_ID, extract_media, set_credentials
 
 class CustomUserManager(UserManager):
     @login_required
@@ -58,6 +58,7 @@ db.init_app(app)  # initialize database
 db.create_all()  # create database if necessary
 user_manager = CustomUserManager(app, db, User)  # initialize Flask-User management
 
+CREDENTIALS = None
 HUB_URL = 'http://localhost:5555'
 HUB_AUTHKEY = '1234567890'
 CHANNEL_AUTHKEY = '0987654321'
@@ -104,6 +105,12 @@ def health_check():
     if not check_authorization(request):
         return "Invalid authorization", 400
     return jsonify({'name':CHANNEL_NAME}),  200
+
+@app.route('/load_creds')
+def load_creds():
+    global CREDENTIALS
+    CREDENTIALS = set_credentials(CREDENTIALS, 'token_2.json', 'cred_2.json')
+    return "Credentials loaded successfully."
 
 # GET: Return list of messages
 @app.route('/', methods=['GET'])
@@ -161,7 +168,7 @@ def read_messages():
 
 
 def save_message(message):
-    message_media = extract_media(message['content'])
+    message_media = extract_media(message['content'], CREDENTIALS)
     message_obj = Post(user_id=current_user.id, content=message['content'])
     db.session.add(message_obj)
     db.session.commit()

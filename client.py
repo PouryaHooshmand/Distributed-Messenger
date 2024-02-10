@@ -8,6 +8,7 @@ from models import db, User
 from google_api_functions import *
 
 SUPPORTED_LANGUAGES = {'en': 'English', 'fr': 'French', 'de': 'German', 'fa': 'Persian'}
+CREDENTIALS = None
 
 class CustomUserManager(UserManager):
     @login_required
@@ -89,13 +90,19 @@ def home_page():
     # fetch list of channels from server
     return render_template("home.html", channels=update_channels())
 
+@app.route('/load_creds')
+def load_creds():
+    global CREDENTIALS
+    CREDENTIALS = set_credentials(CREDENTIALS, 'token_1.json', 'cred_1.json')
+    return "Credentials loaded successfully."
+
 @app.route('/translate', methods=['POST'])
 @login_required
 def translate():
     text = request.get_json()['text']
     lang = current_user.language
 
-    result = translate_text(text, lang)
+    result = translate_text(text, lang, CREDENTIALS)
     return {'translation':result}, 200
         
 

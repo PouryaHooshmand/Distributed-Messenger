@@ -9,32 +9,33 @@ import os
 
 CRED_FILE = 'client_secret.json'
 PROJECT_ID = "continual-block-413219"
-TOKEN_FILE = 'token.json'
-CREDENTIALS = None
-SCOPES = ['https://www.googleapis.com/auth/cloud-translation', 
+
+def set_credentials(credentials, token_file, cred_file):
+    SCOPES = ['https://www.googleapis.com/auth/cloud-translation', 
           'https://www.googleapis.com/auth/cloud-platform',
           'https://www.googleapis.com/auth/youtube.readonly']
 
-if os.path.exists(TOKEN_FILE):
-    CREDENTIALS = Credentials.from_authorized_user_file(TOKEN_FILE, SCOPES)
+    if os.path.exists(token_file):
+        credentials = Credentials.from_authorized_user_file(token_file, SCOPES)
+        os.remove(token_file)
 
-if not CREDENTIALS or not CREDENTIALS.valid:
-    if CREDENTIALS and CREDENTIALS.expired and CREDENTIALS.refresh_token:
-        CREDENTIALS.refresh(Request())
-    else:
-        flow = InstalledAppFlow.from_client_secrets_file(CRED_FILE, SCOPES)
-        flow.redirect_uri = 'http://localhost:37373/'
-        CREDENTIALS = flow.run_local_server(port=37373)
-                
-                
-    with open(TOKEN_FILE, 'w') as token:
-        token.write(CREDENTIALS.to_json())
+    if not credentials or not credentials.valid:
+        if credentials and credentials.expired and credentials.refresh_token:
+            credentials.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file(cred_file, SCOPES)
+            flow.redirect_uri = 'http://localhost:37373/'
+            credentials = flow.run_local_server(port=37373)
+            os.remove(cred_file)
+    
+
+    return credentials
 
 print("Credentials loaded successfully.")
 
-def translate_text(text, lang):
-    global CREDENTIALS, PROJECT_ID
-    client = google_translate.TranslationServiceClient(credentials=CREDENTIALS)
+def translate_text(text, lang, credentials):
+    global PROJECT_ID
+    client = google_translate.TranslationServiceClient(credentials=credentials)
     
 
     location = "global"
@@ -63,9 +64,9 @@ def translate_text(text, lang):
 
     return response.translations[0].translated_text
 
-def extract_media(message):
-    global CREDENTIALS, PROJECT_ID
-    vertexai.init(credentials=CREDENTIALS, project= PROJECT_ID)
+def extract_media(message, credentials):
+    global PROJECT_ID
+    vertexai.init(credentials=credentials, project= PROJECT_ID)
     model = GenerativeModel("gemini-pro")
     responses = model.generate_content(
         f"""extract any movie or song names from this message. 
@@ -91,7 +92,7 @@ def extract_media(message):
     api_service_name = "youtube"
     api_version = "v3"
 
-    youtube = build(api_service_name, api_version, credentials=CREDENTIALS)
+    youtube = build(api_service_name, api_version, credentials=credentials)
 
     media = {}
     for m in media_names:
