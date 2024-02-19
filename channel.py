@@ -61,9 +61,9 @@ user_manager = CustomUserManager(app, db, User)  # initialize Flask-User managem
 CREDENTIALS = None
 HUB_URL = 'http://localhost:5555'
 HUB_AUTHKEY = '1234567890'
-CHANNEL_AUTHKEY = '0987654321'
+CHANNEL_AUTHKEY = '123098456'
 CHANNEL_NAME = "Movie & Music Talk"
-CHANNEL_ENDPOINT = "http://localhost:5001" # don't forget to adjust in the bottom of the file
+CHANNEL_ENDPOINT = "http://vm146.rz.uni-osnabrueck.de/user072/channel.wsgi" # don't forget to adjust in the bottom of the file
 
 @app.cli.command('register')
 def register_command():
@@ -88,6 +88,8 @@ def check_authorization(request):
     # check if authorization header is valid
     if request.headers['Authorization'] != 'authkey ' + CHANNEL_AUTHKEY:
         return False
+    if 'uid' not in request.headers:
+        return True
     user_dict = current_user.__dict__
     if isinstance(current_user, User):
         if str(user_dict['id'])==request.headers['uid']:

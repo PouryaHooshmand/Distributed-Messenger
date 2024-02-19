@@ -4,7 +4,7 @@
 
 <ul>
     {% for channel in channels %}
-        <li><a href="/show?channel={{ channel.endpoint | urlencode }}">{{ channel.name }}</a></li>
+        <li><a href="{{url_for('home_page')}}show?channel={{ channel.endpoint | urlencode }}">{{ channel.name }}</a></li>
     {% endfor %}
 </ul>
 {% endblock %}

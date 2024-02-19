@@ -17,7 +17,7 @@ def set_credentials(credentials, token_file, cred_file):
 
     if os.path.exists(token_file):
         credentials = Credentials.from_authorized_user_file(token_file, SCOPES)
-        os.remove(token_file)
+        open(token_file, 'w').close()
 
     if not credentials or not credentials.valid:
         if credentials and credentials.expired and credentials.refresh_token:
@@ -26,7 +26,7 @@ def set_credentials(credentials, token_file, cred_file):
             flow = InstalledAppFlow.from_client_secrets_file(cred_file, SCOPES)
             flow.redirect_uri = 'http://localhost:37373/'
             credentials = flow.run_local_server(port=37373)
-            os.remove(cred_file)
+            open(cred_file, 'w').close()
     
 
     return credentials
