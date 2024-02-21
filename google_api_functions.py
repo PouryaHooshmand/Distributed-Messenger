@@ -43,12 +43,14 @@ def translate_text(text, lang, credentials):
     parent = f"projects/{PROJECT_ID}/locations/{location}"
 
     text_lang_res = client.detect_language(
-        content="Hello, world!",
+        content=text,
         parent=parent,
         mime_type="text/plain",  # mime types: text/plain, text/html
     )
 
     text_lang = text_lang_res.languages[0].language_code
+    if text_lang == lang:
+        return text
 
     # Detail on supported types can be found here:
     # https://cloud.google.com/translate/docs/supported-formats

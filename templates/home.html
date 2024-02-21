@@ -1,10 +1,39 @@
-{% extends "flask_user_layout.html" %}
-{% block content %}
-<h1>List of message channels</h1>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>The distributed messenger</title>
 
-<ul>
-    {% for channel in channels %}
-        <li><a href="{{url_for('home_page')}}show?channel={{ channel.endpoint | urlencode }}">{{ channel.name }}</a></li>
-    {% endfor %}
-</ul>
-{% endblock %}
+    <!-- Bootstrap -->
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+</head>
+
+
+<body>
+    <div id="header-div" class="clearfix with-margins">
+        <div class="pull-left"><a href="{{ url_for('home_page') }}"><h1 class="no-margins">Home page</h1></a></div>
+        <div class="pull-right">
+        </div>
+    </div>
+
+    <div id="menu-div" class="with-margins">
+        <a href='{{ url_for('home_page') }}'>Home page</a>
+    </div>
+    <h1>List of message channels</h1>
+
+    <ul>
+        {% for channel in channels %}
+            <li><a href="{{url_for('home_page')}}show?channel={{ channel.endpoint | urlencode }}">{{ channel.name }}</a></li>
+        {% endfor %}
+    </ul>
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+
+
+</body>
+</html>

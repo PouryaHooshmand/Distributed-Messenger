@@ -1,47 +1,80 @@
-{% extends "flask_user_layout.html" %}
-{% block content %}
-<p>The distributed messenger. <a href="{{ url_for('home_page') }}">List of channels.</a> </p>
-{% if channel %}
-    <h1>Channel {{ channel.name }}</h1>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Movie & Music Talk</title>
 
-    <div class="msg-container">
-        {% for i in range(messages|count) %}
-            {% if not messages[i].sender %} 
-            <div class="panel panel-default" id="user-msg">
-                <div class="panel-heading"><b>You</b> </div>
-            {% else %}
-            <div class="panel panel-default" id="others-msg">
-                <div class="panel-heading"><b>{{ messages[i].sender }}</b></div>
-            {% endif %}
-                <div class="panel-body">
-                    <p>
-                        <div id="msg_text{{i}}">
-                            <span id="original-text" style="display: inline;">{{ messages[i].content }}</span>
-                            <span id="translated-text" style="display: none;"></span>
-                            <a id="translate" onClick="translate_text('{{ messages[i].content| replace("'", "\\'") | replace('"', '\\"')  }}', '{{ url_for('translate') }}', '{{ i }}');"><i class="material-icons" style="font-size:16px;">translate</i></a>
-                        </div> 
-                            {% for m_title in messages[i].media_links %}
-                            <a title="{{ m_title }}" href="{{messages[i].media_links[m_title]| replace("'", "\\'") | replace('"', '\\"')}}" target="_blank" rel="noopener noreferrer"><i class="material-icons" style="font-size:20px;">video_library</i></a>
-                            {% endfor %}
-                        
-                        </p>
-                </div>
-                <div class="panel-footer"><p style="font-size: 60%">{{ messages[i].timestamp }}</p></div>
-            </div>
-        {% endfor %}
+    <!-- Bootstrap -->
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+</head>
+
+
+<body>
+    <div id="header-div" class="clearfix with-margins">
+        <div class="pull-left"><a href="{{ url_for('home_page') }}"><h1 class="no-margins">Home page</h1></a></div>
     </div>
 
-    <form id="message-form" action="post" method="post">
-        <input type="hidden" name="channel" value="{{ channel.endpoint | urlencode }}">
-        <input type="text" placeholder="Message" name="content" id="content">
-        <input type="submit" id="send-msg" value="&#xe163;">
-    </form>
-{% else %}
-    <h1>Channel not found</h1>
-{% endif %}
+    <div id="menu-div" class="with-margins">
+        <a href='{{ url_for('home_page') }}'>Home page</a>
+        <select id="lang" name="langs">
+            {% for l in language_list %}
+                <option value="{{l}}" {% if l == language %}selected{% endif %}>{{language_list[l]}}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <p>The distributed messenger. <a href="{{ url_for('home_page') }}">List of channels.</a> </p>
+    {% if channel %}
+        <h1>Channel {{ channel.name }}</h1>
 
-<script src="{{ url_for('static',filename='scripts/translate.js') }}"></script>
-<link rel="stylesheet" href="{{ url_for('static',filename='styles/channel.css') }}">
+        <div class="msg-container">
+            {% for i in range(messages|count) %}
+                {% if messages[i].sender == user %} 
+                <div class="panel panel-default" id="user-msg">
+                    <div class="panel-heading"><b>You</b> </div>
+                {% else %}
+                <div class="panel panel-default" id="others-msg">
+                    <div class="panel-heading"><b>{{ messages[i].sender }}</b></div>
+                {% endif %}
+                    <div class="panel-body">
+                        <p>
+                            <div id="msg_text{{i}}">
+                                <span class="original-text" style="display: inline;">{{ messages[i].content }}</span>
+                                <span class="translated-text" style="display: none;"></span>
+                                <a id="translate" onClick="translate_text('{{ messages[i].content| replace("'", "\\'") | replace('"', '\\"')  }}', '{{ url_for('translate') }}', '{{ i }}');"><i class="material-icons" style="font-size:16px;">translate</i></a>
+                            </div> 
+                                {% for m_title in messages[i].media_links %}
+                                <a title="{{ m_title }}" href="{{messages[i].media_links[m_title]| replace("'", "\\'") | replace('"', '\\"')}}" target="_blank" rel="noopener noreferrer"><i class="material-icons" style="font-size:20px;">video_library</i></a>
+                                {% endfor %}
+                            
+                            </p>
+                    </div>
+                    <div class="panel-footer"><p style="font-size: 60%">{{ messages[i].timestamp }}</p></div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <form id="message-form" action="post" method="post">
+            <input type="hidden" name="channel" value="{{ channel.endpoint | urlencode }}">
+            <input type="text" placeholder="Name" value="{{ user }}" name="sender" id="sender" {% if user != ""%}disabled{% endif %}>
+            <input type="text" placeholder="Message" name="content" id="content">
+            <input type="submit" id="send-msg" value="&#xe163;">
+        </form>
+    {% else %}
+        <h1>Channel not found</h1>
+    {% endif %}
+
+    <script src="{{ url_for('static',filename='scripts/translate.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static',filename='styles/channel.css') }}">
 
 
-{% endblock %}
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+
+
+</body>
+</html>

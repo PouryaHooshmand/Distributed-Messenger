@@ -1,40 +1,13 @@
 from flask import Flask, request, render_template, url_for, redirect
-from flask_user import login_required, UserManager, current_user
 import requests
 import urllib.parse
 import datetime
-from models import db, User
+from models import db
 
 from google_api_functions import *
 
 SUPPORTED_LANGUAGES = {'en': 'English', 'fr': 'French', 'de': 'German', 'fa': 'Persian'}
 CREDENTIALS = None
-
-class CustomUserManager(UserManager):
-    @login_required
-    def edit_user_profile_view(self):
-            # Initialize form
-            form = self.EditUserProfileFormClass(request.form, obj=current_user)
-
-            # Process valid POST
-            if request.method == 'POST' and form.validate():
-                # Update fields
-                form.populate_obj(current_user)
-
-                # Save object
-                self.db_manager.save_object(current_user)
-                self.db_manager.commit()
-
-                return redirect(self._endpoint_url(self.USER_AFTER_EDIT_USER_PROFILE_ENDPOINT))
-
-            # Render form
-            self.prepare_domain_translations()
-
-            user_lang = current_user.language
-
-            
-            return render_template(self.USER_EDIT_USER_PROFILE_TEMPLATE, form=form, language_list=SUPPORTED_LANGUAGES, language=user_lang)
-
 
 class ConfigClass(object):
     """ Flask application config """
@@ -46,24 +19,12 @@ class ConfigClass(object):
     SQLALCHEMY_DATABASE_URI = 'sqlite:///database.sqlite'  # File-based SQL database
     SQLALCHEMY_TRACK_MODIFICATIONS = False  # Avoids SQLAlchemy warning
 
-    # Flask-User settings
-    USER_APP_NAME = "Messenger"  # Shown in and email templates and page footers
-    USER_ENABLE_EMAIL = False  # Disable email authentication
-    USER_ENABLE_USERNAME = True  # Enable username authentication
-    USER_REQUIRE_RETYPE_PASSWORD = True  # Simplify register form
-
-    USER_AFTER_REGISTER_ENDPOINT = 'home_page'
-    USER_AFTER_CONFIRM_ENDPOINT = 'home_page'
-    USER_AFTER_LOGIN_ENDPOINT = 'home_page'
-    USER_AFTER_LOGOUT_ENDPOINT = 'home_page'
-
 
 app = Flask(__name__)
 app.config.from_object(__name__ + '.ConfigClass')  # configuration
 app.app_context().push()  # create an app context before initializing db
 db.init_app(app)  # initialize database
 db.create_all()  # create database if necessary
-user_manager = CustomUserManager(app, db, User)  # initialize Flask-User management
 
 HUB_AUTHKEY = '1234567890'
 HUB_URL = 'http://localhost:5555'
@@ -102,10 +63,10 @@ def load_creds():
     return "Credentials loaded successfully."
 
 @app.route('/translate', methods=['POST'])
-@login_required
 def translate():
-    text = request.get_json()['text']
-    lang = current_user.language
+    req = request.get_json()
+    text = req['text']
+    lang = req['language']
 
     result = translate_text(text, lang, CREDENTIALS)
     return {'translation':result}, 200
@@ -115,6 +76,7 @@ def translate():
 def show_channel():
     # fetch list of messages from channel
     show_channel = request.args.get('channel', None)
+    user = request.args.get('user', "")
     if not show_channel:
         return "No channel specified", 400
     channel = None
@@ -124,26 +86,11 @@ def show_channel():
             break
     if not channel:
         return "Channel not found", 404
-    if isinstance(current_user, User):
-        response = requests.get(channel['endpoint'], headers={
-                                                        'Authorization': 'authkey ' + channel['authkey'], 
-                                                        'uid': str(current_user.id), 
-                                                        'password': current_user.password})
-        if response.status_code != 200:
-            return "Error fetching messages: "+str(response.text), 400
-        messages = response.json()
-        return render_template("channel.html", channel=channel, messages=messages)
-    else:
-        return redirect(url_for('user.login'))
-    
-@app.route('/user/lang_update', methods=['POST'])
-@login_required
-def lang_update():
-    # send message to channel
-    lang = request.get_json()['language']
-    current_user.language = lang
-    db.session.commit()
-    return {'message':'ok'}, 200
+    response = requests.get(channel['endpoint'], headers={'Authorization': 'authkey ' + channel['authkey']})
+    if response.status_code != 200:
+        return "Error fetching messages: "+str(response.text), 400
+    messages = response.json()
+    return render_template("channel.html", channel=channel, messages=messages, language_list=SUPPORTED_LANGUAGES, user=user)
 
 @app.route('/post', methods=['POST'])
 def post_message():
@@ -159,20 +106,15 @@ def post_message():
     if not channel:
         return "Channel not found", 404
     message_content = request.form['content']
-    if not current_user.first_name and not current_user.last_name:
-        message_sender = current_user.username
-    else:
-        message_sender = f"{current_user.first_name} {current_user.last_name}" 
+    message_sender = request.form['sender'] 
     message_timestamp = datetime.datetime.now().isoformat()
     response = requests.post(channel['endpoint'],
                              headers={
-                                 'Authorization': 'authkey ' + channel['authkey'], 
-                                 'uid': str(current_user.id), 
-                                 'password': current_user.password},
+                                 'Authorization': 'authkey ' + channel['authkey']},
                              json={'content': message_content, 'sender': message_sender, 'timestamp': message_timestamp})
     if response.status_code != 200:
         return "Error posting message: "+str(response.text), 400
-    return redirect(url_for('show_channel')+'?channel='+urllib.parse.quote(post_channel))
+    return redirect(url_for('show_channel')+'?channel='+urllib.parse.quote(post_channel)+'&user='+urllib.parse.quote(message_sender))
 
 
 # Start development web server

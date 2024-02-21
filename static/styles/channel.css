@@ -73,3 +73,15 @@ a:hover {
     outline: 1px solid black
 }
   
+#sender {
+    border-radius: 20px;
+    margin-left: 1%;
+
+    border:none;
+}
+  
+
+#sender:focus {
+    outline: none;
+}
+  
