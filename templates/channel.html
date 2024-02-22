@@ -60,7 +60,7 @@
 
         <form id="message-form" action="post" method="post">
             <input type="hidden" name="channel" value="{{ channel.endpoint | urlencode }}">
-            <input type="text" placeholder="Name" value="{{ user }}" name="sender" id="sender" {% if user != ""%}disabled{% endif %}>
+            <input type="text" placeholder="Name" value="{{ user }}" name="sender" id="sender" {% if user != ""%}readonly{% endif %}>
             <input type="text" placeholder="Message" name="content" id="content">
             <input type="submit" id="send-msg" value="&#xe163;">
         </form>
