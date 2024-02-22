@@ -40,6 +40,24 @@ a:hover {
     color: #3fa4e7;
 }
 
+.main-div {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.channel-name {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: white;
+    margin: auto;
+    
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 #message-form {
 
     display:flex;
@@ -48,11 +66,15 @@ a:hover {
 
     border:2px solid grey;
     border-radius: 20px;
+    background-color: white;
   
 
     padding:1px;
     width: 96%;
     margin-left: 2%;
+
+    position: sticky;
+    bottom: 0;
 }
   
 #content {
