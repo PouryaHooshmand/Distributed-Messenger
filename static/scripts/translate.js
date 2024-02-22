@@ -33,6 +33,7 @@ function translate_text(text, url, i) {
 }
 
 document.getElementById("lang").onchange = function(){
+  document.getElementById("language").value = document.getElementById("lang").value;
   const translatedElements = document.querySelectorAll('.translated-text');
 
   translatedElements.forEach(element => {

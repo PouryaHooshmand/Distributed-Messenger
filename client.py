@@ -77,6 +77,7 @@ def show_channel():
     # fetch list of messages from channel
     show_channel = request.args.get('channel', None)
     user = request.args.get('user', "")
+    lang = request.args.get('lang', "en")
     if not show_channel:
         return "No channel specified", 400
     channel = None
@@ -90,7 +91,7 @@ def show_channel():
     if response.status_code != 200:
         return "Error fetching messages: "+str(response.text), 400
     messages = response.json()
-    return render_template("channel.html", channel=channel, messages=messages, language_list=SUPPORTED_LANGUAGES, user=user)
+    return render_template("channel.html", channel=channel, messages=messages, language_list=SUPPORTED_LANGUAGES, user=user, language=lang)
 
 @app.route('/post', methods=['POST'])
 def post_message():
@@ -107,6 +108,7 @@ def post_message():
         return "Channel not found", 404
     message_content = request.form['content']
     message_sender = request.form['sender'] 
+    sender_language = request.form['language']
     message_timestamp = datetime.datetime.now().isoformat()
     response = requests.post(channel['endpoint'],
                              headers={
@@ -114,7 +116,7 @@ def post_message():
                              json={'content': message_content, 'sender': message_sender, 'timestamp': message_timestamp})
     if response.status_code != 200:
         return "Error posting message: "+str(response.text), 400
-    return redirect(url_for('show_channel')+'?channel='+urllib.parse.quote(post_channel)+'&user='+urllib.parse.quote(message_sender))
+    return redirect(url_for('show_channel')+'?channel='+urllib.parse.quote(post_channel)+'&user='+urllib.parse.quote(message_sender)+'&lang='+sender_language)
 
 
 # Start development web server
