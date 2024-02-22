@@ -71,9 +71,12 @@ def extract_media(message, credentials):
     vertexai.init(credentials=credentials, project= PROJECT_ID)
     model = GenerativeModel("gemini-pro")
     responses = model.generate_content(
-        f"""extract any movie or song names from this message. 
-        if it's a movie attach ' trailer' to the movie name.
-        finally list them as csv or return '' if there is none. '{message}'""",
+        f"""your task is to extract movie and song names from a message.
+        if the song's artist is mentioned, add it after the song name.
+        add 'trailer' to the movie names and 'song' to the song names.
+        return movie and song names separated by a comma.
+        if there is no movie and song name in the message, return '0'.
+        message: {message}""",
         generation_config={
             "max_output_tokens": 2048,
             "temperature": 0.9,
@@ -87,10 +90,10 @@ def extract_media(message, credentials):
         if response.text:
             res+=response.text
 
-    if res=="''":
+    if res=="0":
         return {}
 
-    media_names = res.split(",")
+    media_names = res.split(", ")
     api_service_name = "youtube"
     api_version = "v3"
 
